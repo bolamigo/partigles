@@ -15,6 +15,7 @@ namespace Quantum {
 		QmWorld();
 		~QmWorld();
 		void simulate(float);
+		float tick(float);
 		void addBody(QmBody*);
 		std::vector<QmBody*> getBodies();
 		void addForceRegistry(QmForceRegistry*);
@@ -24,11 +25,13 @@ namespace Quantum {
 		void clear();
 	private:
 		float time;
+		float ticktime;
 		std::vector<QmBody*> bodies;
 		std::vector<QmForceRegistry*> forceRegistries;
 		glm::vec3 gravity;
 		bool gravityOn;
 		void integrate(float);
+		void interpolate(float);
 		void resetBodies();
 		void applyGravity();
 		void updateForces();

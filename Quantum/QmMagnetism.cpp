@@ -6,9 +6,9 @@
 constexpr float K = 100.f;
 constexpr float EPSILON = .01f;
 
-bool isPointerMagnetic = false;
-
 using namespace Quantum;
+
+bool QmMagnetism::state = true;
 
 void QmMagnetism::update(QmParticle* particle)
 {

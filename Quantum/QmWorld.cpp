@@ -5,6 +5,7 @@
 #include "QmParticle.h"
 #include "QmForceRegistry.h"
 #include "QmDrag.h"
+#include "QmMagnetism.h"
 
 constexpr float GRAVITY_EARTH = 9.81f;
 
@@ -14,6 +15,7 @@ QmWorld::QmWorld()
 {
 	std::cout << "Starting Quantum Physics engine." << std::endl;
 	time = 0.f;
+	ticktime = 0.f;
 	gravity = glm::vec3(0, -GRAVITY_EARTH, 0);
 	gravityOn = true;
 }
@@ -30,6 +32,28 @@ void QmWorld::simulate(float t)
 	updateForces();
 	integrate(t);
 }
+
+float QmWorld::tick(float t)
+{
+	resetBodies();
+	applyGravity();
+	updateForces();
+	integrate(t);
+	ticktime += t;
+	return time - ticktime;
+}
+
+void QmWorld::interpolate(float dt)
+{
+
+}
+
+/*
+void QmWorld::simulate(float t)
+{
+
+}
+*/
 
 void QmWorld::resetBodies()
 {
@@ -53,6 +77,9 @@ void QmWorld::updateForces()
 		QmDrag* dragForce = dynamic_cast<QmDrag*>(forceRegistry->forceGenerator);
 		if (dragForce)
 			isForceOn = dragForce->isOn();
+		QmMagnetism* magnetismForce = dynamic_cast<QmMagnetism*>(forceRegistry->forceGenerator);
+		if (magnetismForce)
+			isForceOn = magnetismForce->isOn();
 
 		if (isForceOn && forceRegistry->forceGenerator && forceRegistry->particle)
 			forceRegistry->forceGenerator->update(forceRegistry->particle);

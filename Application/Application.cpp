@@ -38,7 +38,7 @@ glm::vec3* mousePointer;
 int scene = 0;
 
 bool isPointerMagnetic = false;
-float pointerCharge = 10.f; // strong positive charge
+float pointerCharge = 4.f; // strong positive charge
 
 // ********************** GLUT 
 // Variables globales
@@ -281,7 +281,7 @@ void drawFunc()
 	glLoadIdentity();
 
 	renderText(8, SCREEN_Y - 20, "ESC - Exit", WHITE_VEC3);
-	renderText(8, SCREEN_Y - 40, "Toggles: (P)ause, (G)ravity, (D)rag", WHITE_VEC3);
+	renderText(8, SCREEN_Y - 40, "Toggles: (P)ause, (G)ravity, (D)rag, (M)agnetism, (!)Magnetic cursor", WHITE_VEC3);
 
 	// Status (togglable options)
 	glm::vec3 pauseColor = paused ? GREEN_VEC3 : RED_VEC3;
@@ -289,7 +289,9 @@ void drawFunc()
 	glm::vec3 gravityColor = physicsWorld.isGravityOn() ? GREEN_VEC3 : RED_VEC3;
 	renderText(100, SCREEN_Y - 60, "GRAVITY", gravityColor);
 	glm::vec3 dragColor = QmDrag::isOn() ? GREEN_VEC3 : RED_VEC3;
-	renderText(210, SCREEN_Y - 60, "DRAG", dragColor);
+	renderText(215, SCREEN_Y - 60, "DRAG", dragColor);
+	glm::vec3 magnetismColor = QmMagnetism::isOn() ? GREEN_VEC3 : RED_VEC3;
+	renderText(290, SCREEN_Y - 60, "MAGNETISM", magnetismColor);
 
 	glPopMatrix();
 	glMatrixMode(GL_PROJECTION);
@@ -376,6 +378,9 @@ void keyFunc(unsigned char key, int x, int y)
 		break;
 	case 'd': case 'D':
 		QmDrag::switchState();
+		break;
+	case 'm': case 'M':
+		QmMagnetism::switchState();
 		break;
 	case '!':
 		isPointerMagnetic = !isPointerMagnetic;
