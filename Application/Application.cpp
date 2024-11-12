@@ -115,6 +115,7 @@ QmParticle* createParticle(bool fountain = false)
 
 void initScene1()
 {
+	scene = 1;
 	printf("Scene 1: Particles\n");
 	mousePointer = new glm::vec3(0, 0, 0);
 	for (int i = 0; i < 100; i++)
@@ -123,7 +124,9 @@ void initScene1()
 
 void initScene2()
 {
+	scene = 2;
 	printf("Scene 2: Magnetic particles\n");
+	mousePointer = new glm::vec3(0, 0, 0);
 
 	const int numParticles = 100;
 	for (int i = 0; i < numParticles; ++i) {
@@ -282,7 +285,7 @@ void drawFunc()
 	glm::vec3 gravityColor = physicsWorld.isGravityOn() ? GREEN_VEC3 : RED_VEC3;
 	renderText(100, SCREEN_Y - 60, "GRAVITY", gravityColor);
 	glm::vec3 dragColor = QmDrag::isOn() ? GREEN_VEC3 : RED_VEC3;
-	renderText(200, SCREEN_Y - 60, "DRAG", dragColor);
+	renderText(210, SCREEN_Y - 60, "DRAG", dragColor);
 
 	glPopMatrix();
 	glMatrixMode(GL_PROJECTION);
@@ -332,15 +335,14 @@ void clearWorld()
 {
 	graphicWorld.clear();
 	physicsWorld.clear();
-
 }
 
-void toggleScene(int scene)
+void toggleScene(int sceneNumber)
 {
 	clearWorld();
 	resetView();
 
-	switch (scene)
+	switch (sceneNumber)
 	{
 	case 1: initScene1(); break;
 	case 2: initScene2(); break;
@@ -362,7 +364,7 @@ void keyFunc(unsigned char key, int x, int y)
 	case '2':
 		toggleScene(2);
 		break;
-	case ' ':
+	case 'p': case 'P':
 		cout << ((paused = !paused) ? "" :"un") << "pausing" << endl;
 		break;
 	case 'g': case 'G':
