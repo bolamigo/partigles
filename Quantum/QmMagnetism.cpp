@@ -3,8 +3,10 @@
 #include "QmParticle.h"
 #include "QmWorld.h"
 
-constexpr float K = .1f;
+constexpr float K = 100.f;
 constexpr float EPSILON = .01f;
+
+bool isPointerMagnetic = false;
 
 using namespace Quantum;
 
@@ -21,5 +23,13 @@ void QmMagnetism::update(QmParticle* particle)
             float coefficient = K * (particle->getCharge() * otherParticle->getCharge()) / distanceSquared;
             particle->addForce(glm::normalize(distance) * coefficient);
         }
+    }
+
+    // Apply magnetic force from mouse pointer if it is magnetic
+    if (*isPointerMagnetic && pointerPosition) {
+        glm::vec3 distance = particle->getPosition() - *pointerPosition;
+        float distanceSquared = glm::dot(distance, distance) + EPSILON;
+        float coefficient = K * (particle->getCharge() * (*pointerCharge)) / distanceSquared;
+        particle->addForce(glm::normalize(distance) * coefficient);
     }
 }

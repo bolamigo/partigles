@@ -37,6 +37,9 @@ glm::vec3* mousePointer;
 
 int scene = 0;
 
+bool isPointerMagnetic = false;
+float pointerCharge = 10.f; // strong positive charge
+
 // ********************** GLUT 
 // Variables globales
 
@@ -117,7 +120,7 @@ void initScene1()
 {
 	scene = 1;
 	printf("Scene 1: Particles\n");
-	mousePointer = new glm::vec3(0, 0, 0);
+	mousePointer = new glm::vec3(0);
 	for (int i = 0; i < 100; i++)
 		createParticle();
 }
@@ -126,32 +129,33 @@ void initScene2()
 {
 	scene = 2;
 	printf("Scene 2: Magnetic particles\n");
-	mousePointer = new glm::vec3(0, 0, 0);
+	mousePointer = new glm::vec3(0);
 
 	const int numParticles = 100;
 	for (int i = 0; i < numParticles; ++i) {
 		glm::vec3 position = randomVector(-5, 5);
-		glm::vec3 velocity = randomVector(-2, 2);
+		glm::vec3 velocity = *(new glm::vec3(0));
+		glm::vec3 color;
 
-		QmParticle* p = new QmParticle(position, velocity, glm::vec3(0));
+		QmParticle* particle = new QmParticle(position, velocity, glm::vec3(0));
 
 		if (i < numParticles / 2) {
-			p->setCharge(1.f); // Positive charge
-			GxParticle* g = new GxParticle(RED_VEC3, .2f, position);
-			p->setUpdater(new GxUpdater(g));
-			graphicWorld.addParticle(g);
+			particle->setCharge(1.f); // Positive charge
+			color = RED_VEC3;
 		}
 		else {
-			p->setCharge(-1.f); // Negative charge
-			GxParticle* g = new GxParticle(BLUE_VEC3, .2f, position);
-			p->setUpdater(new GxUpdater(g));
-			graphicWorld.addParticle(g);
+			particle->setCharge(-1.f); // Negative charge
+			color = BLUE_VEC3;
 		}
 
-		physicsWorld.addBody(p);
+		particle->setMass(1);
+		GxParticle* graphicParticle = new GxParticle(color, .2f, position);
+		particle->setUpdater(new GxUpdater(graphicParticle));
+		graphicWorld.addParticle(graphicParticle);
+		physicsWorld.addBody(particle);
 
-		QmMagnetism* magnetism = new QmMagnetism();
-		QmForceRegistry* magneticForceRegistry = new QmForceRegistry(p, magnetism);
+		QmMagnetism* magnetism = new QmMagnetism(&isPointerMagnetic, mousePointer, &pointerCharge);
+		QmForceRegistry* magneticForceRegistry = new QmForceRegistry(particle, magnetism);
 		physicsWorld.addForceRegistry(magneticForceRegistry);
 	}
 }
@@ -372,6 +376,10 @@ void keyFunc(unsigned char key, int x, int y)
 		break;
 	case 'd': case 'D':
 		QmDrag::switchState();
+		break;
+	case '!':
+		isPointerMagnetic = !isPointerMagnetic;
+		printf("Mouse pointer magnetic state: %s\n", isPointerMagnetic ? "ON" : "OFF");
 		break;
 	default:
 		break;
