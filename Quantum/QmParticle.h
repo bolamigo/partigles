@@ -31,6 +31,8 @@ namespace Quantum {
 		void setWorld(QmWorld* world) { this->world = world; }
 		QmWorld* getWorld() const { return world; }
 		QmUpdater* getUpdater() const { return updater; }
+		static float getDamping() { return damping; }
+		static void setDamping(float newDamping) { damping = newDamping; }
 	private:
 		QmUpdater* updater;
 		glm::vec3 position;
@@ -40,7 +42,7 @@ namespace Quantum {
 		float invMass;
 		glm::vec3 forceAccumulator;
 
-		float damping;
+		static float damping;
 		glm::vec3 damp(glm::vec3);
 
 		float charge;

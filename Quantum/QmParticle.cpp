@@ -3,16 +3,16 @@
 #include "QmParticle.h"
 #include "QmUpdater.h"
 
-constexpr float DAMPING = .995;
 constexpr float VELOCITY_MIN = .01;
 
 using namespace Quantum;
+
+float QmParticle::damping = 0.995f;
 
 QmParticle::QmParticle() : position(0, 0, 0), velocity(0, 0, 0), acceleration(0, 0, 0)
 {
 	type = TYPE_PARTICLE;
 	invMass = 0.;
-	damping = DAMPING;
 	forceAccumulator = glm::vec3(0, 0, 0);
 	updater = NULL;
 }
@@ -24,7 +24,6 @@ QmParticle::QmParticle(glm::vec3 pos, glm::vec3 vel, glm::vec3 acc) : QmParticle
 	position = pos;
 	velocity = vel;
 	acceleration = acc;
-	damping = DAMPING;
 	forceAccumulator = glm::vec3(0, 0, 0);
 	updater = NULL;
 }
@@ -38,7 +37,7 @@ glm::vec3 QmParticle::damp(glm::vec3 velocity) {
 	if (length(velocity) <= VELOCITY_MIN)
 		return velocity;
 
-	return damping * velocity;
+	return QmParticle::damping * velocity;
 }
 
 void QmParticle::integrate(float time)

@@ -44,6 +44,8 @@ float pointerCharge = 2.f; // slightly stronger positive charge
 
 std::vector<QmFixedSpring*> pointerSprings;
 
+constexpr float DAMPING_STEP = .001f;
+
 // ********************** GLUT 
 // Variables globales
 
@@ -177,6 +179,12 @@ void attach(QmParticle* particleOne, QmParticle* particleTwo)
 	QmSpring* spring = new QmSpring(particleTwo);
 	QmForceRegistry* springRegistry = new QmForceRegistry(particleOne, spring);
 	physicsWorld.addForceRegistry(springRegistry);
+}
+
+void adjustDamping(float step) {
+	float newDamping = glm::clamp(QmParticle::getDamping() + step, 0.f, 1.f);
+	QmParticle::setDamping(newDamping);
+	printf("Damping adjusted by %.3f. New damping = %.3f.\n", step, newDamping);
 }
 
 void initScene3() {
@@ -494,6 +502,16 @@ void keyFunc(unsigned char key, int x, int y)
 		break;
 	case 't': case 'T':
 		cout << "Ticks o" << ((physicsWorld.useDELTA = !physicsWorld.useDELTA) ? "n" : "ff") << endl;
+		break;
+	case '+':
+		if (glutGetModifiers() == GLUT_ACTIVE_SHIFT) {
+			adjustDamping(-DAMPING_STEP);
+		}
+		break;
+	case '-':
+		if (glutGetModifiers() == GLUT_ACTIVE_SHIFT) {
+			adjustDamping(DAMPING_STEP);
+		}
 		break;
 	default:
 		break;
