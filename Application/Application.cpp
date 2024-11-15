@@ -45,6 +45,8 @@ float pointerCharge = 2.f; // slightly stronger positive charge
 std::vector<QmFixedSpring*> pointerSprings;
 
 constexpr float DAMPING_STEP = .001f;
+constexpr float SPRING_CONSTANT_STEP = 1.f;
+constexpr float REST_LENGTH_STEP = .1f;
 
 // ********************** GLUT 
 // Variables globales
@@ -185,6 +187,20 @@ void adjustDamping(float step) {
 	float newDamping = glm::clamp(QmParticle::getDamping() + step, 0.f, 1.f);
 	QmParticle::setDamping(newDamping);
 	printf("Damping adjusted by %.3f. New damping = %.3f.\n", step, newDamping);
+}
+
+void adjustSpringConstant(float step) {
+	float newSpringConstant = glm::clamp(QmParticle::getDamping() + step, 0.f, 1.f);
+	QmFixedSpring::setSpringConstant(step);
+	QmSpring::setSpringConstant(step);
+	printf("Spring constant adjusted by %.0f. New damping = %.0f.\n", step, newSpringConstant);
+}
+
+void adjustRestLength(float step) {
+	float newRestLength = glm::clamp(QmParticle::getDamping() + step, 0.f, 1.f);
+	QmFixedSpring::setRestLength(newRestLength);
+	QmSpring::setRestLength(newRestLength);
+	printf("Rest length adjusted by %.1f. New rest length = %.1f.\n", step, newRestLength);
 }
 
 void initScene3() {
@@ -507,10 +523,22 @@ void keyFunc(unsigned char key, int x, int y)
 		if (glutGetModifiers() == GLUT_ACTIVE_SHIFT) {
 			adjustDamping(-DAMPING_STEP);
 		}
+		else if (glutGetModifiers() == GLUT_ACTIVE_CTRL) {
+			adjustSpringConstant(SPRING_CONSTANT_STEP);
+		}
+		else if (glutGetModifiers() == GLUT_ACTIVE_ALT) {
+			adjustRestLength(REST_LENGTH_STEP);
+		}
 		break;
 	case '-':
 		if (glutGetModifiers() == GLUT_ACTIVE_SHIFT) {
 			adjustDamping(DAMPING_STEP);
+		}
+		else if (glutGetModifiers() == GLUT_ACTIVE_CTRL) {
+			adjustSpringConstant(-SPRING_CONSTANT_STEP);
+		}
+		else if (glutGetModifiers() == GLUT_ACTIVE_ALT) {
+			adjustRestLength(-REST_LENGTH_STEP);
 		}
 		break;
 	default:
