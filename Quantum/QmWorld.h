@@ -21,8 +21,9 @@ namespace Quantum {
 		void addForceRegistry(QmForceRegistry*);
 		void toggleGravity();
 		bool isGravityOn() const { return gravityOn; };
-
+		bool useDELTA = false;
 		void clear();
+		std::vector<QmForceRegistry*> getForceRegistries() { return forceRegistries; }
 	private:
 		float time;
 		float ticktime;

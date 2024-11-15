@@ -6,8 +6,10 @@
 #include "QmForceRegistry.h"
 #include "QmDrag.h"
 #include "QmMagnetism.h"
+#include "QmUpdater.h"
 
 constexpr float GRAVITY_EARTH = 9.81f;
+constexpr float DELTA = 1.f/120;
 
 using namespace Quantum;
 
@@ -25,6 +27,7 @@ QmWorld::~QmWorld()
 
 }
 
+/* DEPRECATED
 void QmWorld::simulate(float t)
 {
 	resetBodies();
@@ -32,6 +35,7 @@ void QmWorld::simulate(float t)
 	updateForces();
 	integrate(t);
 }
+*/
 
 float QmWorld::tick(float t)
 {
@@ -45,15 +49,32 @@ float QmWorld::tick(float t)
 
 void QmWorld::interpolate(float dt)
 {
-
+	for (QmBody* body : bodies) {
+		QmParticle* particle = dynamic_cast<QmParticle*>(body);
+		if (particle && particle->getUpdater()) {
+			glm::vec3 interpolatedPos = particle->getPosition() + dt * particle->getVelocity();
+			particle->getUpdater()->update(interpolatedPos);
+		}
+	}
 }
 
-/*
 void QmWorld::simulate(float t)
 {
+	time += t;
+	float dt = time - ticktime;
 
+	if (useDELTA)
+	{
+		while (dt >= DELTA)
+			dt = tick(DELTA);
+		interpolate(dt);
+	}
+	else
+	{
+		tick(t);
+		interpolate(0);
+	}
 }
-*/
 
 void QmWorld::resetBodies()
 {
@@ -88,7 +109,6 @@ void QmWorld::updateForces()
 
 void QmWorld::integrate(float t)
 {
-	time += t;
 	for (QmBody* b : bodies)
 		b->integrate(t);
 }

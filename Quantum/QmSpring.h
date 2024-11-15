@@ -3,11 +3,18 @@
 #define QMSPRING_H
 
 #include "QmForceGenerator.h"
+#include "QmParticle.h"
 
 namespace Quantum {
 	class QmSpring : public QmForceGenerator {
 	public:
-		virtual void update(QmParticle*);
+		QmSpring(QmParticle* otherParticle);
+		virtual void update(QmParticle* particle);
+
+		QmParticle* getOtherParticle() const { return other; }
+
+	private:
+		QmParticle* other;
 	};
 }
 

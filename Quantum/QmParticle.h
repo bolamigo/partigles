@@ -30,6 +30,7 @@ namespace Quantum {
 		float getCharge() const { return charge; }
 		void setWorld(QmWorld* world) { this->world = world; }
 		QmWorld* getWorld() const { return world; }
+		QmUpdater* getUpdater() const { return updater; }
 	private:
 		QmUpdater* updater;
 		glm::vec3 position;

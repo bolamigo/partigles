@@ -18,6 +18,8 @@
 #include "QmDrag.h"
 #include "QmForceRegistry.h"
 #include <QmMagnetism.h>
+#include <QmFixedSpring.h>
+#include <QmSpring.h>
 
 constexpr int ESC_KEY = 27;
 
@@ -38,13 +40,15 @@ glm::vec3* mousePointer;
 int scene = 0;
 
 bool isPointerMagnetic = false;
-float pointerCharge = 4.f; // strong positive charge
+float pointerCharge = 2.f; // slightly stronger positive charge
+
+std::vector<QmFixedSpring*> pointerSprings;
 
 // ********************** GLUT 
 // Variables globales
 
-int SCREEN_X = 800;
-int SCREEN_Y = 800;
+int SCREEN_X = 1000;
+int SCREEN_Y = 1000;
 int VIEWPORT_X = 5; int VIEWPORT_Y = 5; int VIEWPORT_Z = 200;
 
 GLuint DrawListSphere;
@@ -148,7 +152,7 @@ void initScene2()
 			color = BLUE_VEC3;
 		}
 
-		particle->setMass(1);
+		particle->setMass(10);
 		GxParticle* graphicParticle = new GxParticle(color, .2f, position);
 		particle->setUpdater(new GxUpdater(graphicParticle));
 		graphicWorld.addParticle(graphicParticle);
@@ -158,6 +162,75 @@ void initScene2()
 		QmForceRegistry* magneticForceRegistry = new QmForceRegistry(particle, magnetism);
 		physicsWorld.addForceRegistry(magneticForceRegistry);
 	}
+}
+
+void attach(glm::vec3 mousepointer, QmParticle* particle)
+{
+	QmFixedSpring* fixedSpring = new QmFixedSpring(*mousePointer);
+	pointerSprings.push_back(fixedSpring);
+	QmForceRegistry* fixedSpringRegistry = new QmForceRegistry(particle, fixedSpring);
+	physicsWorld.addForceRegistry(fixedSpringRegistry);
+}
+
+void attach(QmParticle* particleOne, QmParticle* particleTwo)
+{
+	QmSpring* spring = new QmSpring(particleTwo);
+	QmForceRegistry* springRegistry = new QmForceRegistry(particleOne, spring);
+	physicsWorld.addForceRegistry(springRegistry);
+}
+
+void initScene3() {
+	scene = 3;
+	printf("Scene 3: Springs\n");
+	mousePointer = new glm::vec3(0);
+
+	const int numParticles = 12;
+	std::vector<QmParticle*> particles;
+
+	for (int i = 0; i < numParticles; ++i) {
+		glm::vec3 position = glm::vec3(i, 0, 0); // horizontal line
+		QmParticle* particle = new QmParticle(position, glm::vec3(0), glm::vec3(0));
+		particle->setMass(1.f);
+
+		GxParticle* graphicParticle = new GxParticle(glm::vec3(.5f, .5f, 1.f), .2f, position);
+		particle->setUpdater(new GxUpdater(graphicParticle));
+		graphicWorld.addParticle(graphicParticle);
+		physicsWorld.addBody(particle);
+		particles.push_back(particle);
+	}
+
+	// Following the given example
+	attach(*mousePointer, particles[0]);
+	attach(*mousePointer, particles[1]);
+	attach(*mousePointer, particles[2]);
+
+	attach(particles[0], particles[1]);
+	attach(particles[0], particles[2]);
+	attach(particles[1], particles[2]);
+
+	attach(particles[0], particles[3]);
+	attach(particles[1], particles[3]);
+	attach(particles[2], particles[3]);
+
+	attach(particles[3], particles[4]);
+
+	attach(particles[4], particles[5]);
+	attach(particles[4], particles[6]);
+	attach(particles[4], particles[7]);
+
+	attach(particles[5], particles[6]);
+	attach(particles[5], particles[7]);
+	attach(particles[6], particles[7]);
+
+	attach(particles[7], particles[8]);
+
+	attach(particles[8], particles[9]);
+	attach(particles[8], particles[10]);
+	attach(particles[8], particles[11]);
+
+	attach(particles[9], particles[10]);
+	attach(particles[9], particles[11]);
+	attach(particles[10], particles[11]);
 }
 
 // ***************************** GLUT methods
@@ -225,7 +298,7 @@ void idleFunc()
 
 	calculateFPS(dt);
 
-	if (buttons == GLUT_LEFT_BUTTON) {
+	if (buttons == GLUT_LEFT_BUTTON && scene == 1) {
 		createParticle(true); // fountain = true
 	}
 
@@ -271,6 +344,28 @@ void drawFunc()
 		glPopMatrix();
 	}
 
+	// Draw springs as white lines
+	glColor3f(1.0f, 1.0f, 1.0f);  // Set color to white for spring lines
+	glBegin(GL_LINES);
+	for (QmForceRegistry* registry : physicsWorld.getForceRegistries()) {
+		QmSpring* spring = dynamic_cast<QmSpring*>(registry->forceGenerator);
+		if (spring) {
+			glm::vec3 pos1 = registry->particle->getPosition();
+			glm::vec3 pos2 = spring->getOtherParticle()->getPosition();
+			glVertex3f(pos1.x, pos1.y, pos1.z);
+			glVertex3f(pos2.x, pos2.y, pos2.z);
+		}
+
+		QmFixedSpring* fixedSpring = dynamic_cast<QmFixedSpring*>(registry->forceGenerator);
+		if (fixedSpring) {
+			glm::vec3 pos1 = registry->particle->getPosition();
+			glm::vec3 pos2 = *mousePointer;
+			glVertex3f(pos1.x, pos1.y, pos1.z);
+			glVertex3f(pos2.x, pos2.y, pos2.z);
+		}
+	}
+	glEnd();
+
 	// Controls
 	glMatrixMode(GL_PROJECTION);
 	glPushMatrix();
@@ -281,7 +376,7 @@ void drawFunc()
 	glLoadIdentity();
 
 	renderText(8, SCREEN_Y - 20, "ESC - Exit", WHITE_VEC3);
-	renderText(8, SCREEN_Y - 40, "Toggles: (P)ause, (G)ravity, (D)rag, (M)agnetism, (!)Magnetic cursor", WHITE_VEC3);
+	renderText(8, SCREEN_Y - 40, "Toggles: (P)ause, (G)ravity, (D)rag, (M)agnetism, (!)Magne cursor, (T)icks", WHITE_VEC3);
 
 	// Status (togglable options)
 	glm::vec3 pauseColor = paused ? GREEN_VEC3 : RED_VEC3;
@@ -292,6 +387,10 @@ void drawFunc()
 	renderText(215, SCREEN_Y - 60, "DRAG", dragColor);
 	glm::vec3 magnetismColor = QmMagnetism::isOn() ? GREEN_VEC3 : RED_VEC3;
 	renderText(290, SCREEN_Y - 60, "MAGNETISM", magnetismColor);
+	glm::vec3 magneticCursorColor = isPointerMagnetic ? GREEN_VEC3 : RED_VEC3;
+	renderText(290, SCREEN_Y - 80, "MAGNET CURSOR", magneticCursorColor);
+	glm::vec3 tickColor = physicsWorld.useDELTA ? GREEN_VEC3 : RED_VEC3;
+	renderText(420, SCREEN_Y - 60, "TICKS", tickColor);
 
 	glPopMatrix();
 	glMatrixMode(GL_PROJECTION);
@@ -304,6 +403,10 @@ void drawFunc()
 void locateMouseCursor(int x, int y)
 {
 	*mousePointer = glm::vec3((x - SCREEN_X / 2.f) / 50.f, -(y - SCREEN_Y / 2.f) / 50.f, 0);
+	for (QmFixedSpring* spring : pointerSprings) {
+		spring->setFixedPosition(*mousePointer);
+	}
+	glutPostRedisplay();
 }
 
 void mouseFunc(int button, int state, int x, int y)
@@ -352,6 +455,7 @@ void toggleScene(int sceneNumber)
 	{
 	case 1: initScene1(); break;
 	case 2: initScene2(); break;
+	case 3: initScene3(); break;
 	}
 }
 
@@ -370,6 +474,9 @@ void keyFunc(unsigned char key, int x, int y)
 	case '2':
 		toggleScene(2);
 		break;
+	case '3':
+		toggleScene(3);
+		break;
 	case 'p': case 'P':
 		cout << ((paused = !paused) ? "" :"un") << "pausing" << endl;
 		break;
@@ -383,8 +490,10 @@ void keyFunc(unsigned char key, int x, int y)
 		QmMagnetism::switchState();
 		break;
 	case '!':
-		isPointerMagnetic = !isPointerMagnetic;
-		printf("Mouse pointer magnetic state: %s\n", isPointerMagnetic ? "ON" : "OFF");
+		cout << "Magnetic cursor: o" << ((isPointerMagnetic = !isPointerMagnetic) ? "n" : "ff") << endl;
+		break;
+	case 't': case 'T':
+		cout << "Ticks o" << ((physicsWorld.useDELTA = !physicsWorld.useDELTA) ? "n" : "ff") << endl;
 		break;
 	default:
 		break;
