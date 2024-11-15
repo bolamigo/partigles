@@ -106,7 +106,8 @@ QmParticle* createParticle(bool fountain = false)
 	glm::vec3 vel = fountain ? randomFountainVelocityVector() : randomVector(-8, 8);
     
     QmParticle* particle = new QmParticle(pos, vel, glm::vec3(0));
-	float radius = randomFloat(.1, .4);
+	float radius = randomFloat(.1f, .4f);
+	particle->setRadius(radius);
 	particle->setMass(radius*radius);
 	GxParticle* graphicsParticle = new GxParticle(randomVector(0, 1), radius, pos);
     particle->setUpdater(new GxUpdater(graphicsParticle));
@@ -156,8 +157,10 @@ void initScene2()
 			color = BLUE_VEC3;
 		}
 
+		float radius = .3f;
+		particle->setRadius(radius);
 		particle->setMass(10);
-		GxParticle* graphicParticle = new GxParticle(color, .2f, position);
+		GxParticle* graphicParticle = new GxParticle(color, radius, position);
 		particle->setUpdater(new GxUpdater(graphicParticle));
 		graphicWorld.addParticle(graphicParticle);
 		physicsWorld.addBody(particle);
@@ -193,7 +196,7 @@ void adjustSpringConstant(float step) {
 	float newSpringConstant = glm::clamp(QmParticle::getDamping() + step, 0.f, 1.f);
 	QmFixedSpring::setSpringConstant(step);
 	QmSpring::setSpringConstant(step);
-	printf("Spring constant adjusted by %.0f. New damping = %.0f.\n", step, newSpringConstant);
+	printf("Spring constant adjusted by %f. New damping = %f.\n", step, newSpringConstant);
 }
 
 void adjustRestLength(float step) {
@@ -214,9 +217,11 @@ void initScene3() {
 	for (int i = 0; i < numParticles; ++i) {
 		glm::vec3 position = glm::vec3(i, 0, 0); // horizontal line
 		QmParticle* particle = new QmParticle(position, glm::vec3(0), glm::vec3(0));
+		float radius = .2f;
+		particle->setRadius(radius);
 		particle->setMass(1.f);
 
-		GxParticle* graphicParticle = new GxParticle(glm::vec3(.5f, .5f, 1.f), .2f, position);
+		GxParticle* graphicParticle = new GxParticle(glm::vec3(.5f, .5f, 1.f), radius, position);
 		particle->setUpdater(new GxUpdater(graphicParticle));
 		graphicWorld.addParticle(graphicParticle);
 		physicsWorld.addBody(particle);
@@ -399,22 +404,23 @@ void drawFunc()
 	glPushMatrix();
 	glLoadIdentity();
 
-	renderText(8, SCREEN_Y - 20, "ESC - Exit", WHITE_VEC3);
-	renderText(8, SCREEN_Y - 40, "Toggles: (P)ause, (G)ravity, (D)rag, (M)agnetism, (!)Magne cursor, (T)icks", WHITE_VEC3);
+	renderText(8, SCREEN_Y - 20.f, "ESC - Exit", WHITE_VEC3);
+	renderText(8, SCREEN_Y - 40.f, "Toggles: (P)ause, (G)ravity, (D)rag, (M)agnetism, (!)Magne cursor, (T)icks", WHITE_VEC3);
+	renderText(8, SCREEN_Y - 60.f, "(SHIFT +/-) change damping, (CTRL +/-) change Spring constant, (ALT +/-) change Rest Length", WHITE_VEC3);
 
 	// Status (togglable options)
 	glm::vec3 pauseColor = paused ? GREEN_VEC3 : RED_VEC3;
-	renderText(8, SCREEN_Y - 60, "PAUSE", pauseColor);
+	renderText(8, SCREEN_Y - 80.f, "PAUSE", pauseColor);
 	glm::vec3 gravityColor = physicsWorld.isGravityOn() ? GREEN_VEC3 : RED_VEC3;
-	renderText(100, SCREEN_Y - 60, "GRAVITY", gravityColor);
+	renderText(100, SCREEN_Y - 80.f, "GRAVITY", gravityColor);
 	glm::vec3 dragColor = QmDrag::isOn() ? GREEN_VEC3 : RED_VEC3;
-	renderText(215, SCREEN_Y - 60, "DRAG", dragColor);
+	renderText(215, SCREEN_Y - 80.f, "DRAG", dragColor);
 	glm::vec3 magnetismColor = QmMagnetism::isOn() ? GREEN_VEC3 : RED_VEC3;
-	renderText(290, SCREEN_Y - 60, "MAGNETISM", magnetismColor);
+	renderText(290, SCREEN_Y - 80.f, "MAGNETISM", magnetismColor);
 	glm::vec3 magneticCursorColor = isPointerMagnetic ? GREEN_VEC3 : RED_VEC3;
-	renderText(290, SCREEN_Y - 80, "MAGNET CURSOR", magneticCursorColor);
+	renderText(290, SCREEN_Y - 100.f, "MAGNET CURSOR", magneticCursorColor);
 	glm::vec3 tickColor = physicsWorld.useDELTA ? GREEN_VEC3 : RED_VEC3;
-	renderText(420, SCREEN_Y - 60, "TICKS", tickColor);
+	renderText(420, SCREEN_Y - 80.f, "TICKS", tickColor);
 
 	glPopMatrix();
 	glMatrixMode(GL_PROJECTION);

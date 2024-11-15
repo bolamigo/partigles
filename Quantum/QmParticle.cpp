@@ -33,6 +33,12 @@ QmParticle::~QmParticle()
 	delete updater;
 }
 
+QmAABB Quantum::QmParticle::getAABB()
+{
+	// TODO
+	return QmAABB(*(new glm::vec3(0)), *(new glm::vec3(0))); // placeholder
+}
+
 glm::vec3 QmParticle::damp(glm::vec3 velocity) {
 	if (length(velocity) <= VELOCITY_MIN)
 		return velocity;

@@ -44,6 +44,7 @@ float QmWorld::tick(float t)
 	updateForces();
 	integrate(t);
 	ticktime += t;
+	resolve(narrowphase(broadphase()));
 	return time - ticktime;
 }
 
@@ -105,6 +106,20 @@ void QmWorld::updateForces()
 		if (isForceOn && forceRegistry->forceGenerator && forceRegistry->particle)
 			forceRegistry->forceGenerator->update(forceRegistry->particle);
 	}
+}
+
+std::vector<QmContact> Quantum::QmWorld::broadphase()
+{
+	return std::vector<QmContact>();
+}
+
+std::vector<QmContact> Quantum::QmWorld::narrowphase(std::vector<QmContact> c)
+{
+	return std::vector<QmContact>();
+}
+
+void Quantum::QmWorld::resolve(std::vector<QmContact> c)
+{
 }
 
 void QmWorld::integrate(float t)

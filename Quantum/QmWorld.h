@@ -4,6 +4,7 @@
 #include <list>
 #include <vector>
 #include <glm/glm.hpp>
+#include "QmContact.h"
 
 namespace Quantum {
 
@@ -36,6 +37,9 @@ namespace Quantum {
 		void resetBodies();
 		void applyGravity();
 		void updateForces();
+		std::vector<QmContact> broadphase();
+		std::vector<QmContact> narrowphase(std::vector<QmContact> c);
+		void resolve(std::vector<QmContact> c);
 	};
 
 }

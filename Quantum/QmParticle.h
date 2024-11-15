@@ -4,6 +4,7 @@
 #include <glm/glm.hpp>
 #include "QmBody.h"
 #include "QmWorld.h"
+#include "QmAABB.h"
 
 namespace Quantum {
 	class QmUpdater;
@@ -11,9 +12,9 @@ namespace Quantum {
 	class QmParticle : public QmBody {
 	public:
 		QmParticle();
-		QmParticle(glm::vec3, glm::vec3, glm::vec3);
+		QmParticle(glm::vec3 pos, glm::vec3 vel, glm::vec3 acc);
 		~QmParticle();
-		virtual void integrate(float);
+		virtual void integrate(float time);
 		virtual void resetForces();
 		
 		glm::vec3 getAcceleration();
@@ -21,7 +22,7 @@ namespace Quantum {
 		glm::vec3 getPosition();
 		float getInvMass() const { return invMass; };
 
-		void setMass(float);
+		void setMass(float mass);
 		void setUpdater(QmUpdater*);
 		void addForce(glm::vec3);
 		void addAcceleration(glm::vec3);
@@ -33,6 +34,11 @@ namespace Quantum {
 		QmUpdater* getUpdater() const { return updater; }
 		static float getDamping() { return damping; }
 		static void setDamping(float newDamping) { damping = newDamping; }
+		float getRadius() { return radius; }
+		void setRadius(float newRadius) { radius = newRadius; }
+		float getRestitution() { return restitution; }
+		void setRestitution(float newRestitution) { restitution = newRestitution; }
+		QmAABB getAABB();
 	private:
 		QmUpdater* updater;
 		glm::vec3 position;
@@ -47,6 +53,9 @@ namespace Quantum {
 
 		float charge;
 		QmWorld* world;
+
+		float radius;
+		float restitution;
 	};
 }
 
