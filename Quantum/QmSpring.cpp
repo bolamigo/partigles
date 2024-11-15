@@ -19,6 +19,6 @@ namespace Quantum {
         glm::vec3 force = direction * forceMagnitude;
 
         particle->addForce(force);
-        // other->addForce(-force); // This destroys everything
+        // other->addForce(-force); // This destroys everything, should be fixed with RK4
     }
 }
